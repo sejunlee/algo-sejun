@@ -1,0 +1,261 @@
+
+#define _CRT_SECURE_NO_WARNINGS
+#include <iostream>
+#include <stdio.h>
+#include <algorithm>
+#include <vector>
+using namespace std;
+
+#define MAX_ARR_SIZE 12
+#define coordi_pair pair<int, int>
+#define UNVISIT 0
+#define VISIT   2
+#define EAST    0
+#define SOUTH   1
+#define WEST    2
+#define NORTH   3
+int store_arr[MAX_ARR_SIZE][MAX_ARR_SIZE];
+int tc_cnt, N, answer, process_num;
+
+bool isOverlapLine(int check_x, int check_y, int cur_dir) {
+	if (cur_dir == EAST) {
+		for (int idx = check_y + 1; idx < N; idx++) {
+			if (store_arr[check_x][idx] != UNVISIT)
+				return false;
+		}
+	}
+	else if (cur_dir == SOUTH) {
+		for (int idx = check_x + 1; idx < N; idx++) {
+			if (store_arr[idx][check_y] != UNVISIT)
+				return false;
+		}
+	}
+	else if (cur_dir == WEST) {
+		for (int idx = 0; idx < check_y; idx++) {
+			if (store_arr[check_x][idx] != UNVISIT)
+				return false;
+		}
+	}
+	else {
+		for (int idx = 0; idx < check_x; idx++) {
+			if (store_arr[idx][check_y] != UNVISIT)
+				return false;
+		}
+	}
+	return true;
+}
+
+int isCoreLine(int check_x, int check_y, int dir, int flag) {
+	int ans = 0;
+	if (dir == EAST) {
+		for (int idx = check_y + 1; idx < N; idx++) {
+			store_arr[check_x][idx] = (flag == UNVISIT) ? VISIT : UNVISIT;
+			ans++;
+		}
+	}
+	else if (dir == SOUTH) {
+		for (int idx = check_x + 1; idx < N; idx++) {
+			store_arr[idx][check_y] = (flag == UNVISIT) ? VISIT : UNVISIT;
+			ans++;
+		}
+	}
+	else if (dir == WEST) {
+		for (int idx = 0; idx < check_y; idx++) {
+			store_arr[check_x][idx] = (flag == UNVISIT) ? VISIT : UNVISIT;
+			ans++;
+		}
+	}
+	else if (dir == NORTH) {
+		for (int idx = 0; idx < check_x; idx++) {
+			store_arr[idx][check_y] = (flag == UNVISIT) ? VISIT : UNVISIT;
+			ans++;
+		}
+	}
+	return ans;
+}
+
+void search_dfs(vector<coordi_pair> &core_info, int idx, int cur_process_num, int line) {
+
+	//if (core_info.size() > idx)
+		//printf("Y: %d , X: %d , idx: %d , num: %d\n", core_info[idx].first, core_info[idx].second, idx, num);
+	//system("pause");
+
+	if (idx == core_info.size()) {
+		if (process_num < cur_process_num) {
+			answer = line;
+			process_num = cur_process_num;
+			
+		}
+		else if (process_num == cur_process_num) {
+			if (answer > line) 
+				answer = line;
+		}
+	}
+	else {
+		for (int idx_coordi_dir = 0; idx_coordi_dir < 4; idx_coordi_dir++) {
+			if (isOverlapLine(core_info[idx].first, core_info[idx].second, idx_coordi_dir)) {
+				
+
+				search_dfs(core_info,
+							idx + 1, 
+							cur_process_num + 1,
+							line + isCoreLine(core_info[idx].first, core_info[idx].second, idx_coordi_dir, 0));
+
+				isCoreLine(core_info[idx].first, core_info[idx].second, idx_coordi_dir, 1);
+
+			}
+		}
+		/*
+		printf("Y: %d , X: %d , idx: %d , num: %d\n", core_info[idx].first, core_info[idx].second, idx, num);
+		for (int idx_x = 0; idx_x < N; idx_x++) {
+			for (int idx_y = 0; idx_y < N; idx_y++) {
+				printf("%d ", store_arr[idx_x][idx_y]);
+			}
+			printf("\n");
+		}
+		*/
+
+	//	system("pause");
+		search_dfs(core_info, idx + 1, cur_process_num, line);
+
+	}
+}
+
+int check_core_connect(int check_x, int check_y) {
+	if (check_x == 0 || check_y == 0 || check_x == N - 1 || check_y == N - 1)
+		return 1;
+
+	return 0;
+}
+
+int main() {
+	scanf("%d", &tc_cnt);
+	for (int TCs = 1; TCs <= tc_cnt; TCs++) {
+		vector<coordi_pair> core_info_save;
+		scanf("%d", &N);
+
+		for (int idx_x = 0; idx_x < N; idx_x++) {
+			for (int idx_y = 0; idx_y < N; idx_y++) {
+				scanf("%d", &store_arr[idx_x][idx_y]);
+				if (check_core_connect(idx_x, idx_y))
+					continue;
+				
+				if (store_arr[idx_x][idx_y] == 1) {
+					core_info_save.push_back(coordi_pair(idx_x, idx_y));
+				}
+			}
+		}
+
+		answer = 99999999;
+		process_num = 0;
+		search_dfs(core_info_save, 0, 0, 0);
+		printf("#%d %d\n", TCs, answer);
+	}
+}
+
+
+
+
+
+
+
+/*
+
+bool isOverlapLine(int check_x, int check_y, int cur_dir) {
+if (cur_dir == EAST) {
+for (int idx = check_y + 1; idx < N; idx++) {
+if (store_arr[check_x][idx] != UNVISIT)
+return false;
+}
+}
+else if (cur_dir == SOUTH) {
+for (int idx = check_x + 1; idx < N; idx++) {
+if (store_arr[idx][check_y] != UNVISIT)
+return false;
+}
+}
+else if (cur_dir == WEST) {
+for (int idx = 0; idx < check_y; idx++) {
+if (store_arr[check_x][idx] != UNVISIT)
+return false;
+}
+}
+else {
+for (int idx = 0; idx < check_x; idx++) {
+if (store_arr[idx][check_y] != UNVISIT)
+return false;
+}
+}
+return true;
+}
+
+int isCoreLine(int check_x, int check_y, int dir, int flag) {
+int ans = 0;
+if (dir == EAST) {
+for (int idx = check_y + 1; idx < N; idx++) {
+store_arr[check_x][idx] = (flag == UNVISIT) ? VISIT : UNVISIT;
+ans++;
+}
+}
+else if (dir == SOUTH) {
+for (int idx = check_x + 1; idx < N; idx++) {
+store_arr[idx][check_y] = (flag == UNVISIT) ? VISIT : UNVISIT;
+ans++;
+}
+}
+else if (dir == WEST) {
+for (int idx = 0; idx < check_y; idx++) {
+store_arr[check_x][idx] = (flag == UNVISIT) ? VISIT : UNVISIT;
+ans++;
+}
+}
+else if (dir == NORTH) {
+for (int idx = 0; idx < check_x; idx++) {
+store_arr[idx][check_y] = (flag == UNVISIT) ? VISIT : UNVISIT;
+ans++;
+}
+}
+return ans;
+}
+
+void search_dfs(vector<coordi_pair> &core_info, int idx, int num, int line) {
+if (idx == core_info.size()) {
+cnt1++;
+if (pnum < num) {
+answer = line;
+pnum = num;
+
+}
+else if (pnum == num) {
+
+if (answer > line)
+answer = line;
+}
+}
+else {
+for (int idx_coordi_dir = 0; idx_coordi_dir < 4; idx_coordi_dir++) {
+if (isOverlapLine(core_info[idx].first, core_info[idx].second, idx_coordi_dir)) {
+
+
+search_dfs(core_info,
+idx + 1,
+num + 1,
+line + isCoreLine(core_info[idx].first, core_info[idx].second, idx_coordi_dir, 0));
+
+isCoreLine(core_info[idx].first, core_info[idx].second, idx_coordi_dir, 1);
+
+}
+}
+
+search_dfs(core_info, idx + 1, num, line);
+
+}
+}
+
+int check_core_connect(int check_x, int check_y) {
+if (check_x == 0 || check_y == 0 || check_x == N - 1 || check_y == N - 1)
+return 1;
+
+return 0;
+}
+*/
