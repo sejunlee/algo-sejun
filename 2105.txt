@@ -162,121 +162,123 @@ bool check_coordi_info(int x, int y) {
 }
 */
 
-#define _CRT_SECURE_NO_WARNINGS
 #include <cstdio>
-#include <string>
-
-#define RIGHT_DOWN    0 
-#define LEFT_DOWN     1  
-#define LEFT_UP       2    
-#define RIGHT_UP      3   
-
+#include <cstring>
+  
+#define RIGHT_DOWN    0    // Right Down
+#define LEFT_DOWN    1    // Left Down
+#define LEFT_UP    2    // Left Up
+#define RIGHT_UP    3    // Right Up
+  
 using namespace std;
-
-int N, answer, end_x, end_y;
+  
+int N, answer, endX, endY;
 int store_map[20][20];
 bool checkOverlapNumber[101];
-
+  
 void checkCase(int x, int y, int VisitCnt, int dir) {
-	if (dir == RIGHT_DOWN) {
-		if (x + 1 < N && y + 1 < N - 1) {
-			if (!checkOverlapNumber[store_map[y + 1][x + 1]]) {
-				checkOverlapNumber[store_map[y + 1][x + 1]] = true;
-				checkCase(x + 1, y + 1, VisitCnt + 1, RIGHT_DOWN);
-				checkOverlapNumber[store_map[y + 1][x + 1]] = false;
-			}
-		}
-		if (!checkOverlapNumber[store_map[y + 1][x - 1]]) {
-			checkOverlapNumber[store_map[y + 1][x - 1]] = true;
-			checkCase(x - 1, y + 1, VisitCnt + 1, LEFT_DOWN);
-			checkOverlapNumber[store_map[y + 1][x - 1]] = false;
-		}
-		else if (dir == LEFT_DOWN) {
-			if (x - 1 > 0 && y + 1 < N) {
-				if (!checkOverlapNumber[store_map[y + 1][x - 1]]) {
-					checkOverlapNumber[store_map[y + 1][x - 1]] = true;
-					checkCase(x - 1, y + 1, VisitCnt + 1, LEFT_DOWN);
-					checkOverlapNumber[store_map[y + 1][x - 1]] = false;
-				}
-			}
-			if (!checkOverlapNumber[store_map[y - 1][x - 1]]) {
-				checkOverlapNumber[store_map[y - 1][x - 1]] = true;
-				checkCase(x - 1, y - 1, VisitCnt + 1, LEFT_UP);
-				checkOverlapNumber[store_map[y - 1][x - 1]] = false;
-			}
-		}
-		else if (dir == LEFT_UP) {
-			if (x - 1 >= 0 && y - 1 > 0) {
-				if (!checkOverlapNumber[store_map[y - 1][x - 1]]) {
-					checkOverlapNumber[store_map[y - 1][x - 1]] = true;
-					checkCase(x - 1, y - 1, VisitCnt + 1, LEFT_UP);
-					checkOverlapNumber[store_map[y - 1][x - 1]] = false;
-				}
-			}
-			if (!checkOverlapNumber[store_map[y - 1][x + 1]]) {
-				checkOverlapNumber[store_map[y - 1][x + 1]] = true;
-				checkCase(x + 1, y - 1, VisitCnt + 1, RIGHT_UP);
-				checkOverlapNumber[store_map[y - 1][x + 1]] = false;
-			}
-			else {
-				if (x + 1 == end_x && y - 1 == end_y) {
-					if (answer < VisitCnt)
-						answer = VisitCnt;
-				}
-			}
-		}
-		else if (dir == RIGHT_UP) {
-			if (x + 1 == end_x && y - 1 == end_y) {
-				if (answer < VisitCnt) {
-					answer = VisitCnt;
-				}
-			}
-			if (x + 1 < N && y - 1 >= 0) {
-				if (!checkOverlapNumber[store_map[y - 1][x + 1]]) {
-					checkOverlapNumber[store_map[y - 1][x + 1]] = true;
-					checkCase(x + 1, y - 1, VisitCnt + 1, RIGHT_UP);
-					checkOverlapNumber[store_map[y - 1][x + 1]] = false;
-				}
-			}
-		}
-	}
+    switch(dir) {
+        case RIGHT_DOWN:
+            if(x+1 < N && y+1 < N-1) {
+                if(!checkOverlapNumber[store_map[y+1][x+1]]) {
+                    checkOverlapNumber[store_map[y+1][x+1]] = true;
+                    checkCase(x+1,y+1,VisitCnt+1, RIGHT_DOWN);
+                    checkOverlapNumber[store_map[y+1][x+1]] = false;
+                }
+            }
+            if(!checkOverlapNumber[store_map[y+1][x-1]]) {
+                checkOverlapNumber[store_map[y+1][x-1]] = true;
+                checkCase(x-1,y+1,VisitCnt+1,LEFT_DOWN);
+                checkOverlapNumber[store_map[y+1][x-1]] = false;
+            }
+            break;
+        case LEFT_DOWN:
+            if(x-1 > 0 && y+1 < N) {
+                if(!checkOverlapNumber[store_map[y+1][x-1]]) {
+                    checkOverlapNumber[store_map[y+1][x-1]] = true;
+                    checkCase(x-1,y+1,VisitCnt+1, LEFT_DOWN);
+                    checkOverlapNumber[store_map[y+1][x-1]] = false;
+                }
+            }
+            if(!checkOverlapNumber[store_map[y-1][x-1]]) {
+                checkOverlapNumber[store_map[y-1][x-1]] = true;
+                checkCase(x-1,y-1,VisitCnt+1, LEFT_UP);
+                checkOverlapNumber[store_map[y-1][x-1]] = false;
+            }
+            break;
+        case LEFT_UP:
+            if(x-1 >= 0 && y-1 > 0) {
+                if(!checkOverlapNumber[store_map[y-1][x-1]]) {
+                    checkOverlapNumber[store_map[y-1][x-1]] = true;
+                    checkCase(x-1,y-1,VisitCnt+1, LEFT_UP);
+                    checkOverlapNumber[store_map[y-1][x-1]] = false;
+                }
+            }
+            if(!checkOverlapNumber[store_map[y-1][x+1]]) {
+                checkOverlapNumber[store_map[y-1][x+1]] = true;
+                checkCase(x+1,y-1,VisitCnt+1, RIGHT_UP);
+                checkOverlapNumber[store_map[y-1][x+1]] = false;
+            } else {
+                if(x+1 == endX && y-1 == endY) {
+                    if(answer < VisitCnt)
+                        answer = VisitCnt;
+                    break;
+                }
+            }
+            break;
+        case RIGHT_UP:
+            if(x+1 == endX && y-1 == endY) {
+                if(answer < VisitCnt) {
+                    answer = VisitCnt;
+                }
+                break;
+            }
+            if(x+1 < N && y-1 >= 0) {
+                if(!checkOverlapNumber[store_map[y-1][x+1]]) {
+                    checkOverlapNumber[store_map[y-1][x+1]] = true;
+                    checkCase(x+1,y-1,VisitCnt+1, RIGHT_UP);
+                    checkOverlapNumber[store_map[y-1][x+1]] = false;
+                }
+            }
+            break;
+    }
 }
-
+  
 void calcAnswer(void) {
-	for (int i = 0; i<N - 2; i++) {
-		for (int j = 1; j<N - 1; j++) {
-			if (store_map[i][j] != store_map[i + 1][j + 1]) {
-				end_x = j;
-				end_y = i;
-				checkOverlapNumber[store_map[i][j]] = true;
-				checkOverlapNumber[store_map[i + 1][j + 1]] = true;
-				checkCase(j + 1, i + 1, 2, RIGHT_DOWN);
-				checkOverlapNumber[store_map[i][j]] = false;
-				checkOverlapNumber[store_map[i + 1][j + 1]] = false;
-			}
-		}
-	}
+    for(int i=0; i<N-2; i++) {
+        for(int j=1; j<N-1; j++) {
+            if(store_map[i][j] != store_map[i+1][j+1]) {
+                endX = j;
+                endY = i;
+                checkOverlapNumber[store_map[i][j]] = true;
+                checkOverlapNumber[store_map[i+1][j+1]] = true;
+                checkCase(j+1,i+1,2, RIGHT_DOWN);
+                checkOverlapNumber[store_map[i][j]] = false;
+                checkOverlapNumber[store_map[i+1][j+1]] = false;
+            }
+        }
+    }
 }
-
+  
 int main(void) {
-	int T;
-	scanf("%d", &T);
-
-	for (int t_case = 1; t_case <= T; t_case++) {
-		scanf("%d", &N);
-
-		for (int i = 0; i<N; i++) {
-			for (int j = 0; j<N; j++)
-				scanf("%d", &store_map[i][j]);
-		}
-
-		memset(checkOverlapNumber, false, sizeof(bool) * 101);
-		answer = 0;
-		calcAnswer();
-
-		printf("#%d %d\n", t_case, answer == 0 ? -1 : answer);
-	}
-
-
-	return 0;
+    int T;
+    scanf("%d", &T);
+  
+    for(int t_case=1; t_case<=T; t_case++) {
+        scanf("%d", &N);
+  
+        for(int i=0; i<N; i++) {
+            for(int j=0; j<N; j++)
+                scanf("%d", &store_map[i][j]);
+        }
+  
+        memset(checkOverlapNumber, false, sizeof(bool) * 101);
+        answer = 0;
+        calcAnswer();
+  
+        printf("#%d %d\n", t_case, answer == 0 ? -1 : answer);
+    }
+  
+  
+    return 0;
 }
