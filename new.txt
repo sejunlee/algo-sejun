@@ -1,0 +1,82 @@
+#include <iostream>
+#include <stdio.h>
+#include <algorithm>
+#include <string.h>
+using namespace std;
+
+int N, M, C, answer;
+int saveNumber[11][11];
+int statusCurNumber[11][11];
+
+void getFinalResult();
+void loopSetOptimalNum();
+void setOptimalResult(int x, int y, int cnt, int sum, int final_sum);
+
+void loopSetOptimalNum() {
+	for (int idx_y = 0; idx_y < N; idx_y++){
+		for (int idx_x = 0; idx_x <= N - M; idx_x++){
+			setOptimalResult(idx_x, idx_y, 0, 0, 0);
+		}
+	}
+}
+
+void setOptimalResult(int x, int y, int cnt, int sum, int final_sum) {
+	if (cnt == M) {
+		if (sum <= C && saveNumber[y][x - M] < final_sum) {
+			saveNumber[y][x - M] = final_sum;
+		}
+	}
+	else {
+		setOptimalResult(x + 1, y, cnt + 1, sum, final_sum);
+		setOptimalResult(x + 1, y, cnt + 1, sum + statusCurNumber[y][x],
+			final_sum + statusCurNumber[y][x] * statusCurNumber[y][x]);
+	}
+}
+
+void getFinalResult() {
+	int search_result;
+
+	for (int normal_y = 0; normal_y < N; normal_y++) {
+		for (int normal_x = 0; normal_x <= N - M; normal_x++) {
+			search_result = saveNumber[normal_y][normal_x];
+
+			for (int target_x = normal_x + M; target_x < N - M; target_x++) {
+				search_result += saveNumber[normal_y][target_x];
+				if (search_result > answer)
+					answer = search_result;
+				search_result -= saveNumber[normal_y][target_x];
+			}
+
+			for (int target_y = normal_y + 1; target_y < N; target_y++) {
+				for (int target_x = 0; target_x <= N - M; target_x++) {
+					search_result += saveNumber[target_y][target_x];
+					if (search_result > answer)
+						answer = search_result;
+					search_result -= saveNumber[target_y][target_x];
+				}
+			}
+		}
+	}
+}
+
+int main(void) {
+	int T;
+	scanf("%d", &T);
+
+	for (int t_case = 1; t_case <= T; t_case++) {
+		memset(saveNumber, -1, sizeof(int) * 100);
+		scanf("%d %d %d", &N, &M, &C);
+
+		for (int i = 0; i < N; i++)
+			for (int j = 0; j < N; j++)
+				scanf("%d", &statusCurNumber[i][j]);
+
+		loopSetOptimalNum();
+		answer = 0;
+		getFinalResult();
+
+		printf("#%d %d\n", t_case, answer);
+	}
+
+	return 0;
+}
