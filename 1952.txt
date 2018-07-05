@@ -1,0 +1,36 @@
+#include <iostream>
+#include <stdio.h>
+#include <algorithm>
+using namespace std;
+
+int TCs;
+int months_plan[13], price[4], temp_min_month[13], result_month[13];
+
+void main() {
+	scanf("%d", &TCs);
+	for (int test_case = 1; test_case <= TCs; test_case++) {
+		for (int input_price = 0; input_price < 4; input_price++)
+			scanf("%d", &price[input_price]);
+
+		for (int input_month = 1; input_month <= 12; input_month++)
+			scanf("%d", &months_plan[input_month]);
+
+		for (int input_month = 1; input_month <= 12; input_month++)
+			temp_min_month[input_month] = min(months_plan[input_month] * price[0], price[1]);
+
+		for (int input_month = 1; input_month <= 12; input_month++) {
+			result_month[input_month] = result_month[input_month - 1] + temp_min_month[input_month];
+
+			if (input_month - 3 >= 0) {
+				if (result_month[input_month] > result_month[input_month - 3] + price[2]) {
+					result_month[input_month] = result_month[input_month - 3] + price[2];
+				}
+			}
+		}
+
+		if (result_month[12] > price[3])
+			result_month[12] = price[3];
+
+		printf("#%d %d\n", test_case, result_month[12]);
+	}
+}
