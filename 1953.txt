@@ -1,0 +1,164 @@
+#include <iostream>
+#include <stdio.h>
+#include <algorithm>
+#include <queue>
+using namespace std;
+
+#define UNVISTE 0
+#define VISTE 1
+#define MAX_TUNNEL_SIZE 51
+
+int TCs, N, M, R, C, L, answer;
+int visited_tunnel[MAX_TUNNEL_SIZE][MAX_TUNNEL_SIZE], 
+status_tunnel[MAX_TUNNEL_SIZE][MAX_TUNNEL_SIZE];
+
+int dx[4] = { 1, 0, -1, 0 };
+int dy[4] = { 0, -1, 0, 1 };
+
+void init();
+void search_bfs();
+bool check_range(int cur_x, int cur_y);
+bool cur_move_tunnel(int cur_x, int cur_y, int cur_dir);
+bool next_move_tunnel(int cur_x, int cur_y, int cur_dir);
+int get_result();
+
+struct defector_info {
+	int x;
+	int y;
+	int cnt;
+};
+
+queue <defector_info> sequence_info;
+
+int main() {
+	scanf("%d", &TCs);
+	
+	for (int test_case = 1; test_case <= TCs; test_case++) {
+		init();
+		search_bfs();
+
+			printf("#%d %d\n", test_case, get_result());
+	}
+}
+
+void init() {
+	scanf("%d %d %d %d %d", &N, &M, &R, &C, &L);
+	for (int y = 0; y < N; y++) {
+		for (int x = 0; x < M; x++) {
+			scanf("%d", &status_tunnel[y][x]);
+			visited_tunnel[y][x] = UNVISTE;
+		}
+	}
+	answer = 0;
+
+	while (!sequence_info.empty())
+		sequence_info.pop();
+
+	defector_info input;
+	input.x = C;
+	input.y = R;
+	input.cnt = 1;
+	sequence_info.push(input);
+	visited_tunnel[R][C] = VISTE;
+}
+
+void search_bfs() {
+	while (!sequence_info.empty()) {
+		defector_info cur_info = sequence_info.front();
+		defector_info in;
+		sequence_info.pop();
+
+		if (cur_info.cnt == L)
+			continue;
+
+		for (int dir = 0; dir < 4; dir++) {
+			if (check_range(cur_info.x + dx[dir], cur_info.y + dy[dir]))
+				continue;
+
+			if (cur_move_tunnel(cur_info.x, cur_info.y, dir))
+				continue;
+
+			if (next_move_tunnel(cur_info.x + dx[dir], cur_info.y + dy[dir], dir))
+				continue;
+
+			in.x = cur_info.x + dx[dir];
+			in.y = cur_info.y + dy[dir];
+			in.cnt = cur_info.cnt + 1;
+			visited_tunnel[cur_info.y + dy[dir]][cur_info.x + dx[dir]] = VISTE;
+			sequence_info.push(in);
+			answer = in.cnt;
+		}
+	}
+}
+
+bool check_range(int cur_x, int cur_y) {
+	if (cur_x < 0 || cur_y < 0 || cur_x >= M || cur_y >= N || 
+		visited_tunnel[cur_y][cur_x] == VISTE)
+		return true;
+	else
+		return false;
+}
+
+bool cur_move_tunnel(int cur_x, int cur_y, int cur_dir) {
+	if (status_tunnel[cur_y][cur_x] == 2) {
+		if (cur_dir == 0 || cur_dir == 2)
+			return true;
+	}
+	else if (status_tunnel[cur_y][cur_x] == 3) {
+		if (cur_dir == 1 || cur_dir == 3)
+			return true;
+	}
+	else if (status_tunnel[cur_y][cur_x] == 4) {
+		if (cur_dir == 2 || cur_dir == 3)
+			return true;
+	}
+	else if (status_tunnel[cur_y][cur_x] == 5) {
+		if (cur_dir == 1 || cur_dir == 2)
+			return true;
+	}
+	else if (status_tunnel[cur_y][cur_x] == 6) {
+		if (cur_dir == 0 || cur_dir == 1)
+			return true;
+	}
+	else if (status_tunnel[cur_y][cur_x] == 7) {
+		if (cur_dir == 0 || cur_dir == 3)
+			return true;
+	}
+	return false;
+}
+
+bool next_move_tunnel(int cur_x, int cur_y, int cur_dir) {
+	if (cur_dir == 0) {
+		if (status_tunnel[cur_y][cur_x] == 1 || status_tunnel[cur_y][cur_x] == 3 ||
+			status_tunnel[cur_y][cur_x] == 6 || status_tunnel[cur_y][cur_x] == 7)
+			return false;
+	}
+	else if (cur_dir == 1) {
+		if (status_tunnel[cur_y][cur_x] == 1 || status_tunnel[cur_y][cur_x] == 2 ||
+			status_tunnel[cur_y][cur_x] == 5 || status_tunnel[cur_y][cur_x] == 6)
+			return false;
+	}
+	else if (cur_dir == 2) {
+		if (status_tunnel[cur_y][cur_x] == 1 || status_tunnel[cur_y][cur_x] == 3 ||
+			status_tunnel[cur_y][cur_x] == 4 || status_tunnel[cur_y][cur_x] == 5)
+			return false;
+	}
+	else if (cur_dir == 3) {
+		if (status_tunnel[cur_y][cur_x] == 1 || status_tunnel[cur_y][cur_x] == 2 ||
+			status_tunnel[cur_y][cur_x] == 4 || status_tunnel[cur_y][cur_x] == 7)
+			return false;
+	}
+	return true;
+}
+
+int get_result() {
+	int answer_cnt = 0;
+
+	for (int y = 0; y < N; y++) {
+		for (int x = 0; x < M; x++) {
+			if (visited_tunnel[y][x] == VISTE)
+				answer_cnt += 1;
+		}
+	}
+	return answer_cnt;
+}
