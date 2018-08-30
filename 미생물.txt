@@ -1,0 +1,119 @@
+#if 0
+#define _CRT_SECURE_NO_WARNINGS
+#include<stdio.h>
+#include<iostream>
+#include<algorithm>
+using namespace std;
+
+
+struct microorganism_info {
+	int y;
+	int x;
+	int cnt;
+	int coordi;
+};
+
+microorganism_info save_info[1004];
+
+
+int N, M, K, answer, TCs;
+
+int dx[] = { 0, 0, 0, -1, 1 };
+int dy[] = { 0, -1, 1, 0, 0 };
+
+
+int turn(int dir);
+void init();
+
+int main(void) {
+	scanf("%d", &TCs);
+
+	for (int test_case = 1; test_case <= TCs; test_case++) {
+		init();
+
+		for (int time = 0; time < M; time++) {
+			//for (int i = 0; i < save_info.size(); i++) {
+				//printf("X = %d , Y = %d , cnt = %d , coordi = %d\n", save_info[i].x, save_info[i].y, save_info[i].cnt, save_info[i].coordi);
+			//}
+			//system("pause");
+			// ???? ??
+			for (int microorganism_move = 0; microorganism_move < K; microorganism_move++) {
+				if (save_info[microorganism_move].cnt == 0)
+					continue;
+
+				int move_x = save_info[microorganism_move].x + dx[save_info[microorganism_move].coordi];
+				int move_y = save_info[microorganism_move].y + dy[save_info[microorganism_move].coordi];
+
+				if (move_x == 0 || move_x == (N - 1) || move_y == 0 || move_y == (N - 1)) {
+					save_info[microorganism_move].coordi = turn(save_info[microorganism_move].coordi);
+					save_info[microorganism_move].cnt = save_info[microorganism_move].cnt / 2;
+				}
+
+				save_info[microorganism_move].x = move_x;
+				save_info[microorganism_move].y = move_y;
+
+			}
+
+			// ???? ??? ????
+			for (int normal = 0; normal < K; normal++) {
+				if (save_info[normal].cnt == 0)
+					continue;
+
+				for (int target = 0; target < K; target++) {
+					if (save_info[normal].x == save_info[target].x && save_info[normal].y == save_info[target].y) {
+						if (save_info[normal].cnt > save_info[target].cnt) {
+							save_info[target].coordi = save_info[normal].coordi;
+						}
+						else {
+							save_info[normal].coordi = save_info[target].coordi;
+						}
+					}
+				}
+			}
+
+			for (int normal = 0; normal < K - 1; normal++) {
+				if (save_info[normal].cnt == 0)
+					continue;
+
+				for (int target = normal + 1; target < K; target++) {
+					if (save_info[normal].x == save_info[target].x && save_info[normal].y == save_info[target].y) {
+						save_info[normal].cnt += save_info[target].cnt;
+						save_info[target].cnt = 0;
+					}
+				}
+			}
+		}
+
+		for (int microorganism_sum = 0; microorganism_sum < K; microorganism_sum++) {
+			//if (save_info[microorganism_sum].cnt != 0) {
+				//printf("?? %d\n", save_info[microorganism_sum].cnt);
+				answer += save_info[microorganism_sum].cnt;
+			//}
+		}
+
+		printf("#%d %d\n", 0, answer);
+	}
+
+}
+
+
+
+void init() {
+	answer = 0;
+	//save_info.clear();
+	scanf("%d %d %d", &N, &M, &K);
+	for (int input_microorganism = 0; input_microorganism < K; input_microorganism++) {
+		
+		scanf("%d %d %d %d", &save_info[input_microorganism].y, &save_info[input_microorganism].x, 
+			&save_info[input_microorganism].cnt, &save_info[input_microorganism].coordi);
+		//save_info.push_back(input);
+	}
+}
+
+int turn(int dir) {
+	if (dir == 1) return 2;
+	else if (dir == 2) return 1;
+	else if (dir == 3) return 4;
+	else if (dir == 4) return 3;
+}
+#endif
