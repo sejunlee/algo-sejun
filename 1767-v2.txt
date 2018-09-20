@@ -1,0 +1,186 @@
+#if 1
+#include <iostream>
+#include <vector>
+
+#define UNVISIT 0
+#define VISIT 1
+#define CORE 1
+#define PROCESSOR_SIZE 13
+using namespace std;
+
+
+struct core_info {
+	int x;
+	int y;
+};
+
+vector <core_info> core_list;
+int N, answer, pnum, TCs;
+int processor_info[PROCESSOR_SIZE][PROCESSOR_SIZE];
+int visit_info[PROCESSOR_SIZE][PROCESSOR_SIZE];
+
+void init();
+void find_max_result(int processor_cnt, int sum, int processor_num);
+int fill_visit(int x, int y, int dir, int fill_flag);
+bool is_visit(int x, int y, int dir);
+
+int main() {
+	cin >> TCs;
+	for (int testcase=1; testcase<= TCs; testcase++) {
+		init();
+		find_max_result(0, 0, 0);
+		printf("#%d %d\n", testcase, answer);
+	}
+	return 0;
+}
+
+void find_max_result(int processor_cnt, int sum, int processor_num) {
+
+	if (processor_cnt == core_list.size()) {
+		if (pnum < processor_num) {
+			answer = sum;
+			pnum = processor_num;
+		}
+		else if (pnum == processor_num) {
+			if (answer > sum) {
+				answer = sum;
+			}
+		}
+	}
+	else {
+		for (int dir_idx = 0; dir_idx < 4; dir_idx++) {
+			int sum_cnt = fill_visit(core_list[processor_cnt].x, core_list[processor_cnt].y, dir_idx, 0);
+
+			/*
+			for (int idx_y = 0; idx_y < N; idx_y++) {
+				for (int idx_x = 0; idx_x < N; idx_x++) {
+					cout << visit_info[idx_y][idx_x] << " ";
+				}
+				cout << endl;
+			}
+			system("pause");
+			*/
+			if (sum_cnt >= 0) {
+				find_max_result(processor_cnt + 1, sum + sum_cnt, processor_num + 1);
+				fill_visit(core_list[processor_cnt].x, core_list[processor_cnt].y, dir_idx, 1);
+			}
+		}
+		find_max_result(processor_cnt + 1, sum, processor_num);
+	}
+}
+
+int fill_visit(int x, int y, int dir, int fill_flag) {
+	int check_cnt = 0;
+	if (0 == fill_flag) {
+		if (true == is_visit(x, y, dir)) {
+			return -1;
+		}
+	}
+	
+
+	if (dir == 0) {
+		for (int idx_x = x; idx_x < N; idx_x++) {
+			check_cnt = check_cnt + 1;
+			if (0 == fill_flag) {
+				visit_info[y][idx_x] = VISIT;
+			}
+			else {
+				visit_info[y][idx_x] = UNVISIT;
+			}
+		}
+	}
+	else if (dir == 1) {
+		for (int idx_y = y; idx_y >= 0; idx_y--) {
+			check_cnt = check_cnt + 1;
+			if (0 == fill_flag) {
+				visit_info[idx_y][x] = VISIT;
+			}
+			else {
+				visit_info[idx_y][x] = UNVISIT;
+			}
+		}
+	} 
+	else if (dir == 2) {
+		for (int idx_x = x; idx_x >= 0; idx_x--) {
+			check_cnt = check_cnt + 1;
+			if (0 == fill_flag) {
+				visit_info[y][idx_x] = VISIT;
+			}
+			else {
+				visit_info[y][idx_x] = UNVISIT;
+			}
+		}
+	}
+	else if (dir == 3) {
+		for (int idx_y = y; idx_y < N; idx_y++) {
+			check_cnt = check_cnt + 1;
+			if (0 == fill_flag) {
+				visit_info[idx_y][x] = VISIT;
+			}
+			else {
+				visit_info[idx_y][x] = UNVISIT;
+			}
+		}
+	}
+	return check_cnt -1 ;
+}
+
+
+bool is_visit(int x, int y, int dir) {
+	if (dir == 0) {
+		for (int idx_x = x; idx_x < N; idx_x++) {
+			if (VISIT == visit_info[y][idx_x]) {
+				return true;
+			}
+		}
+	}
+	else if (dir == 1) {
+		for (int idx_y = y; idx_y >= 0; idx_y--) {
+			if (VISIT == visit_info[idx_y][x]) {
+				return true;
+			}
+		}
+	}
+	else if (dir == 2) {
+		for (int idx_x = x; idx_x >= 0; idx_x--) {
+			if (VISIT == visit_info[y][idx_x]) {
+				return true;
+			}
+		}
+	}
+	else if (dir == 3) {
+		for (int idx_y = y; idx_y < N; idx_y++) {
+			if (VISIT == visit_info[idx_y][x]) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+void init() {
+	cin >> N;
+	core_list.clear();
+	for (int idx_y = 0; idx_y < N; idx_y++) {
+		for (int idx_x = 0; idx_x < N; idx_x++) {
+			visit_info[idx_y][idx_x] = UNVISIT;
+			cin >> processor_info[idx_y][idx_x];
+
+			if (CORE == processor_info[idx_y][idx_x]) {
+				if (idx_x == 0 || idx_y == 0 || idx_x == N - 1 || idx_y == N - 1) {
+					visit_info[idx_y][idx_x] = VISIT;
+				}
+				else {
+					core_info core_input;
+					core_input.x = idx_x;
+					core_input.y = idx_y;
+					core_list.push_back(core_input);
+				}
+			}
+
+		}
+	}
+	answer = 98776555;
+	pnum = 0;
+}
+#endif
