@@ -1,0 +1,219 @@
+#include <iostream>
+#include <vector>
+#include <math.h>
+using namespace std;
+
+#define MAP_SIZE 12
+
+struct ap_info {
+	int x;
+	int y;
+	int c;
+	int p;
+};
+
+struct coordi_info {
+	int x;
+	int y;
+};
+
+vector <int> people_a_move_list;
+vector <int> people_b_move_list;
+vector <ap_info> ap_list;
+coordi_info a, b;
+int M, A, cur_time, answer, TCs;
+ 
+
+void init();
+void get_result();
+void move_people();
+int get_max_charge();
+int search_charge_idx(int ap_idx, int people_flag);
+
+int main() {
+	cin >> TCs;
+	for (int test = 1; test <= TCs; test++) {
+		init();
+		get_result();
+		cout <<"#"<<test<<" "<<answer << endl;
+	}
+	
+	return 0;
+}
+
+void init() {
+	people_a_move_list.clear();
+	people_b_move_list.clear();
+	ap_list.clear();
+	cur_time = 0;
+	cin >> M >> A;
+	for (int in_idx = 0; in_idx < M; in_idx++) {
+		int move;
+		cin >> move;
+		people_a_move_list.push_back(move);
+	}
+
+	for (int in_idx = 0; in_idx < M; in_idx++) {
+		int move;
+		cin >> move;
+		people_b_move_list.push_back(move);
+	}
+
+	for (int in_idx = 0; in_idx < A; in_idx++) {
+		ap_info ap_info;
+		cin >> ap_info.x >> ap_info.y >> ap_info.c >> ap_info.p;
+		ap_list.push_back(ap_info);
+	}
+
+	a.x = 1;
+	a.y = 1;
+	b.x = 10;
+	b.y = 10;
+	answer = 0;
+}
+
+void get_result() {
+
+	do {
+		answer = answer + get_max_charge();
+		move_people();
+		cur_time++;
+	} while (cur_time != M);
+	answer = answer + get_max_charge();
+}
+
+int get_max_charge() {
+	int sum = 0, max_a = 0, max_b = 0;
+	bool overlap_check = false;
+
+	for (int a_idx = 0; a_idx < ap_list.size(); a_idx++) {
+		int d_a = abs(a.x - ap_list[a_idx].x) + abs(a.y - ap_list[a_idx].y);
+		if (d_a <= ap_list[a_idx].c) {
+			if (max_a < (ap_list[a_idx].p)) {
+				max_a = ap_list[a_idx].p;
+			}
+
+			int d_b = abs(b.x - ap_list[a_idx].x) + abs(b.y - ap_list[a_idx].y);
+			if (d_b <= ap_list[a_idx].c) {
+				overlap_check = true;
+			}
+		}
+	}
+
+	for (int b_idx = 0; b_idx < ap_list.size(); b_idx++) {
+		int d_b = abs(b.x - ap_list[b_idx].x) + abs(b.y - ap_list[b_idx].y);
+		if (d_b <= ap_list[b_idx].c) {
+			if (max_b < (ap_list[b_idx].p)) {
+				max_b = ap_list[b_idx].p;
+			}
+		}
+	}
+
+	if(true == overlap_check) {
+		for (int a_idx = 0; a_idx < ap_list.size(); a_idx++) {
+			int d_a = abs(a.x - ap_list[a_idx].x) + abs(a.y - ap_list[a_idx].y);
+			if (d_a <= ap_list[a_idx].c) {
+			
+				for (int b_idx = 0; b_idx < ap_list.size(); b_idx++) {
+					int d_b = abs(b.x - ap_list[b_idx].x) + abs(b.y - ap_list[b_idx].y);
+					if (d_b <= ap_list[b_idx].c) {
+
+						if (a_idx == b_idx) {
+							if (sum < (ap_list[a_idx].p)) {
+								sum = (ap_list[a_idx].p);
+							}
+						}
+						else {
+							if (sum < (ap_list[a_idx].p + ap_list[b_idx].p)) {
+								sum = (ap_list[a_idx].p + ap_list[b_idx].p);
+							}
+						}
+					}
+				}
+
+			}
+		}
+	}
+	
+	if (true == overlap_check) {
+		return sum;
+	}
+	else {
+		return max_a + max_b;
+	}
+}
+
+int search_charge_idx(int ap_idx, int people_flag) {
+	int x, y, max = -1, result_idx = -1;
+	if (0 == people_flag) {
+		x = a.x;
+		y = a.y;
+	} else {
+		x = b.x;
+		y = b.y;
+	}
+
+	for (int idx = 0; idx < ap_list.size(); idx++) {
+		int d = abs(x - ap_list[idx].x) + abs(y - ap_list[idx].y);
+		if (d <= ap_list[idx].c) {
+			if (0 == people_flag) {
+				if (max < ap_list[idx].p) {
+					max = ap_list[idx].p;
+					result_idx = idx;
+				}
+			} else {
+				if (ap_idx == idx) {
+					if (max < (ap_list[idx].p / 2)) {
+						max = (ap_list[idx].p / 2);
+						result_idx = idx;
+					}
+				}
+				else if (max < ap_list[idx].p) {
+					max = ap_list[idx].p;
+					result_idx = idx;
+				}
+			}
+		}
+	}
+	return result_idx;
+}
+
+void move_people() {
+	for (int people_idx = 0; people_idx < 2; people_idx++) {
+		if (0 == people_idx) {
+			switch (people_a_move_list[cur_time]) {
+			case 0:
+				break;
+			case 1:
+				a.y = a.y - 1;
+				break;
+			case 2:
+				a.x = a.x + 1;
+				break;
+			case 3:
+				a.y = a.y + 1;
+				break;
+			case 4:
+				a.x = a.x - 1;
+				break;
+			}
+		} else {
+			switch (people_b_move_list[cur_time]) {
+			case 0:
+				break;
+			case 1:
+				b.y = b.y - 1;
+				break;
+			case 2:
+				b.x = b.x + 1;
+				break;
+			case 3:
+				b.y = b.y + 1;
+				break;
+			case 4:
+				b.x = b.x - 1;
+				break;
+			}
+		}
+	}
+}
