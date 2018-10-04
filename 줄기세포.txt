@@ -1,0 +1,164 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+#define UNACTIVATION 0
+#define ACTIVATION 1
+#define DEAD 2
+
+#define UNVISITED 0
+#define WAITING 1
+#define VISITED 2
+
+struct cell_info {
+	int x;
+	int y;
+	int status;
+};
+
+struct change_waiting_cell {
+	int x;
+	int y;
+};
+
+int dx[4] = { 1,0,-1,0 };
+int dy[4] = { 0,-1,0,1 };
+int visited_arr[501][501];
+int same_time_save_arr[501][501]; 
+int cur_time_save_arr[501][501];
+int N, M, K, cur_time, TCs;
+vector <change_waiting_cell> waiting_cell_info_list;
+vector <cell_info> cell_info_list;
+
+void init();
+void breeding_cell();
+
+int main() {
+	cin >> TCs;
+
+	for (int tc = 1; tc <= TCs; tc++) {
+		init();
+		breeding_cell();
+
+		cout <<"#"<<tc<<" "<< cell_info_list.size() << endl;
+	}
+	return 0;
+}
+
+void init() {
+	waiting_cell_info_list.clear();
+	cell_info_list.clear();
+    for (int in_y = 0; in_y < 500; in_y++) {
+		for (int in_x = 0; in_x < 500; in_x++) {
+			visited_arr[in_y][in_x] = UNVISITED;
+			same_time_save_arr[in_y][in_x] = 0;
+			cur_time_save_arr[in_y][in_x] = 0;
+		}
+	}
+    
+	cin >> N >> M >> K;
+	int input_time;
+	for (int in_y = 0; in_y < N; in_y++) {
+		for (int in_x = 0; in_x < M; in_x++) {
+			cin >> input_time;
+			if (0 != input_time) {
+				cell_info input;
+				input.x = in_x + 250;
+				input.y = in_y + 250;
+				input.status = UNACTIVATION;
+				cell_info_list.push_back(input);
+				visited_arr[input.y][input.x] = VISITED;
+				same_time_save_arr[input.y][input.x] = input_time;
+				cur_time_save_arr[input.y][input.x] = input_time;
+			}
+		}
+	}
+
+	cur_time = 0;
+}
+
+void breeding_cell() {
+
+	while (cur_time < K + 1) {
+
+		int cell_size = cell_info_list.size();
+		for (int cell_idx = 0; cell_idx < cell_size; cell_idx++) {
+			int cur_x = cell_info_list[cell_idx].x;
+			int cur_y = cell_info_list[cell_idx].y;
+
+			if (ACTIVATION == cell_info_list[cell_idx].status) {
+
+					for (int dir_idx = 0; dir_idx < 4; dir_idx++) {
+						if (UNVISITED == visited_arr[cur_y + dy[dir_idx]][cur_x + dx[dir_idx]]) {
+							visited_arr[cur_y + dy[dir_idx]][cur_x + dx[dir_idx]] = WAITING;
+							cur_time_save_arr[cur_y + dy[dir_idx]][cur_x + dx[dir_idx]] =
+								same_time_save_arr[cur_y][cur_x];
+
+							same_time_save_arr[cur_y + dy[dir_idx]][cur_x + dx[dir_idx]] =
+							cur_time_save_arr[cur_y + dy[dir_idx]][cur_x + dx[dir_idx]];
+							change_waiting_cell input_waiting_cell;
+							input_waiting_cell.x = cur_x + dx[dir_idx];
+							input_waiting_cell.y = cur_y + dy[dir_idx];
+							waiting_cell_info_list.push_back(input_waiting_cell);
+
+
+							cell_info input_cell;
+							input_cell.x = cur_x + dx[dir_idx];
+							input_cell.y = cur_y + dy[dir_idx];
+							input_cell.status = UNACTIVATION;
+							cell_info_list.push_back(input_cell);
+						}
+						else if (WAITING == visited_arr[cur_y + dy[dir_idx]][cur_x + dx[dir_idx]]) {
+							if (cur_time_save_arr[cur_y + dy[dir_idx]][cur_x + dx[dir_idx]] <
+								same_time_save_arr[cur_y][cur_x]) {
+
+								cur_time_save_arr[cur_y + dy[dir_idx]][cur_x + dx[dir_idx]] =
+									same_time_save_arr[cur_y][cur_x];
+
+							}
+						}
+					}
+
+			}
+		}
+
+		for (int waiting_cell_idx = 0; waiting_cell_idx < waiting_cell_info_list.size(); waiting_cell_idx++) {
+			visited_arr[waiting_cell_info_list[waiting_cell_idx].y][waiting_cell_info_list[waiting_cell_idx].x] = VISITED;
+		}
+        
+		waiting_cell_info_list.clear();
+
+
+		int cell_idx = 0;
+		while (cell_idx < cell_info_list.size()) {
+
+			if (0 == cur_time_save_arr[cell_info_list[cell_idx].y][cell_info_list[cell_idx].x]) {
+
+				if (UNACTIVATION == cell_info_list[cell_idx].status) {
+					cell_info_list[cell_idx].status = ACTIVATION;
+					cur_time_save_arr[cell_info_list[cell_idx].y][cell_info_list[cell_idx].x] = same_time_save_arr[cell_info_list[cell_idx].y][cell_info_list[cell_idx].x];
+
+					cell_idx++;
+				} else if (ACTIVATION == cell_info_list[cell_idx].status) {
+					cur_time_save_arr[cell_info_list[cell_idx].y][cell_info_list[cell_idx].x] = same_time_save_arr[cell_info_list[cell_idx].y][cell_info_list[cell_idx].x];
+					
+					
+					cell_info_list.erase(cell_info_list.begin() + cell_idx);
+
+					
+					
+				}
+			} else {
+				cell_idx++;
+			}
+		}
+
+		cell_idx = 0;
+		while (cell_idx < cell_info_list.size()) {
+			cur_time_save_arr[cell_info_list[cell_idx].y][cell_info_list[cell_idx].x] -= 1;
+			cell_idx++;
+		}
+
+		cur_time++;
+	}
+}
