@@ -1,0 +1,100 @@
+#include <iostream>
+#include <queue>
+#define MAX_SIZE 101
+#define VISTE 1
+#define UNVISTE 0
+#define LEFT 0
+#define RIGHT 1
+#define UNAPPLE 0
+#define SNAKE 1
+#define APPLE 2
+using namespace std;
+
+typedef pair<int, int> coordi_info;
+typedef struct {
+	int sec;
+	int dir;
+} turn_info;
+
+int N, K, L, turn_idx;
+queue <coordi_info> snake_trace;
+int store_map[MAX_SIZE][MAX_SIZE];
+turn_info turnInfo[MAX_SIZE];
+
+int dx[4] = { -1, 1, 0, 0 };
+int dy[4] = { 0, 0, -1, 1 };
+void init();
+int is_snake_dead(coordi_info snake_coordi);
+int snake_turn(int now, int next);
+
+int main() {
+	int cur_snake_dir = 3, cur_sec = 0;
+	coordi_info snake_head;
+	snake_head.first = 0;
+	snake_head.second = 0;
+
+	init();
+	while (!is_snake_dead(snake_head)) {
+		if ((store_map[snake_head.first][snake_head.second] == UNAPPLE) && (cur_sec != 0)) {
+			store_map[snake_trace.front().first][snake_trace.front().second] = UNVISTE;
+			snake_trace.pop();
+		}	
+	
+
+	store_map[snake_head.first][snake_head.second] = VISTE;
+	snake_trace.push(snake_head);
+
+	if (turn_idx < L && turnInfo[turn_idx].sec == cur_sec) {
+		cur_snake_dir = snake_turn(cur_snake_dir, turnInfo[turn_idx].dir);
+		turn_idx++;
+	}
+		snake_head.first += dx[cur_snake_dir];
+		snake_head.second += dy[cur_snake_dir];
+		cur_sec++;
+	}
+
+	printf("%d\n", cur_sec);
+
+	return 0;
+}
+
+void init() {
+	int x, y, sec;
+	char dir;
+	scanf("%d %d", &N, &K);
+
+	for (int in_apple = 0; in_apple < K; in_apple++) {
+		scanf("%d %d", &x, &y);
+		store_map[x - 1][y - 1] = APPLE;
+	}
+
+	scanf("%d", &L);
+	for (int in_turn = 0; in_turn < L; in_turn++) {
+		scanf("%d %c", &sec, &dir);
+		turnInfo[in_turn].sec = sec;
+
+		if (dir == 'L')
+			turnInfo[in_turn].dir = LEFT;
+		else
+			turnInfo[in_turn].dir = RIGHT;
+	}
+}
+
+int is_snake_dead(coordi_info snake_coordi) {
+	if (snake_coordi.first < 0 || snake_coordi.second < 0 || snake_coordi.first >= N || snake_coordi.second >= N ||
+		store_map[snake_coordi.first][snake_coordi.second] == 1)
+		return 1;
+
+	return 0;
+}
+
+int snake_turn(int now, int next) {
+	if (next == 0) {
+		if (now == 0 || now == 1) return (now + 2) % 4;
+		else return 3 - now;
+	}
+	else {
+		if (now == 0 || now == 1) return 3 - now;
+		else return (now + 2) % 4;
+	}
+}
